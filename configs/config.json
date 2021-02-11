@@ -1,0 +1,28 @@
+{
+    "edge_type": 3,
+    "cnn": {
+        "filters": [
+            32,
+            64
+        ]
+    },
+    "edge_encoder": {
+        "hidden_units": [
+            64,
+            64
+        ],
+        "dropout": 0.0,
+        "batch_norm": false,
+        "kernel_l2": 0.001
+    },
+    "node_decoder": {
+        "hidden_units": [
+            64,
+            64
+        ],
+        "dropout": 0.0,
+        "batch_norm": false,
+        "kernel_l2": 0.001
+    },
+    "learning_rate": 0.001
+}
