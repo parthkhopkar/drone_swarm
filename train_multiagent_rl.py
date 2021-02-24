@@ -48,8 +48,7 @@ from ray.rllib.env.multi_agent_env import ENV_STATE
 
 from gym_pybullet_drones.envs.BaseAviary import DroneModel, Physics
 from gym_pybullet_drones.envs.multi_agent_rl.FlockAviary import FlockAviary
-from gym_pybullet_drones.envs.multi_agent_rl.LeaderFollowerAviary import LeaderFollowerAviary
-from gym_pybullet_drones.envs.multi_agent_rl.MeetupAviary import MeetupAviary
+from gym_pybullet_drones.envs.multi_agent_rl.GoalAviary import GoalAviary
 from gym_pybullet_drones.envs.single_agent_rl.BaseSingleAgentAviary import ActionType, ObservationType
 from gym_pybullet_drones.utils.Logger import Logger
 
@@ -61,6 +60,8 @@ from swarmnet import SwarmNetRL
 
 OWN_OBS_VEC_SIZE = None # Modified at runtime
 ACTION_VEC_SIZE = None # Modified at runtime
+NUM_NODES = 5
+OUTPUT_DIM = 4
 
 #### Useful links ##########################################
 # Workflow: github.com/ray-project/ray/blob/master/doc/source/rllib-training.rst
@@ -142,7 +143,7 @@ if __name__ == "__main__":
     #### Define and parse (optional) arguments for the script ##
     parser = argparse.ArgumentParser(description='Multi-agent reinforcement learning experiments script')
     parser.add_argument('--num_drones',  default=2,            type=int,                                                                 help='Number of drones (default: 2)', metavar='')
-    parser.add_argument('--env',         default='flock',      type=str,             choices=['leaderfollower', 'flock', 'meetup'],      help='Help (default: ..)', metavar='')
+    parser.add_argument('--env',         default='goal',      type=str,             choices=['flock', 'goal'],      help='Help (default: ..)', metavar='')
     parser.add_argument('--obs',         default='kin',        type=ObservationType,                                                     help='Help (default: ..)', metavar='')
     parser.add_argument('--act',         default='one_d_rpm',  type=ActionType,                                                          help='Help (default: ..)', metavar='')
     parser.add_argument('--algo',        default='cc',         type=str,             choices=['cc'],                                     help='Help (default: ..)', metavar='')
@@ -155,13 +156,8 @@ if __name__ == "__main__":
     if not os.path.exists(filename):
         os.makedirs(filename+'/')
 
-    # #### Print out current git commit hash #####################
-    # git_commit = subprocess.check_output(["git", "describe", "--tags"]).strip()
-    # with open(filename+'/git_commit.txt', 'w+') as f:
-    #     f.write(str(git_commit))
-
     #### Constants, and errors #################################
-    if ARGS.obs==ObservationType.KIN:  # TODO: Need to train RL using just 4 obs or determine what it needs to receive, probably just 4 
+    if ARGS.obs==ObservationType.KIN:  # TODO: Need to train RL using just 4 obs, maybe create a new observation space?
         OWN_OBS_VEC_SIZE = 12
     elif ARGS.obs==ObservationType.RGB:
         print("[ERROR] ObservationType.RGB for multi-agent systems not yet implemented")
@@ -169,6 +165,7 @@ if __name__ == "__main__":
     else:
         print("[ERROR] unknown ObservationType")
         exit()
+        
     if ARGS.act in [ActionType.ONE_D_RPM, ActionType.ONE_D_DYN, ActionType.ONE_D_PID]:
         ACTION_VEC_SIZE = 1
     elif ARGS.act in [ActionType.RPM, ActionType.DYN, ActionType.VEL]:
@@ -189,7 +186,7 @@ if __name__ == "__main__":
     #### Register the custom centralized critic model ##########
     ModelCatalog.register_custom_model("cc_model", SwarmNetRL) # TODO: Register the SwarmNet model in the same way
 
-    #### Register the environment ##############################
+    #### Register the environment with RLLib##############################
     temp_env_name = "this-aviary-v0"
     if ARGS.env == 'flock': # TODO: Change observation in FlockAviary to make sure that they are the same as Swarms
         register_env(temp_env_name, lambda _: FlockAviary(num_drones=ARGS.num_drones,
@@ -198,19 +195,12 @@ if __name__ == "__main__":
                                                           act=ARGS.act
                                                           )
                      )
-    elif ARGS.env == 'leaderfollower':
-        register_env(temp_env_name, lambda _: LeaderFollowerAviary(num_drones=ARGS.num_drones,
+    elif ARGS.env == 'goal':
+        register_env(temp_env_name, lambda _: GoalAviary(num_drones=ARGS.num_drones,
                                                                    aggregate_phy_steps=shared_constants.AGGR_PHY_STEPS,
                                                                    obs=ARGS.obs,
                                                                    act=ARGS.act
                                                                    )
-                     )
-    elif ARGS.env == 'meetup':
-        register_env(temp_env_name, lambda _: MeetupAviary(num_drones=ARGS.num_drones,
-                                                           aggregate_phy_steps=shared_constants.AGGR_PHY_STEPS,
-                                                           obs=ARGS.obs,
-                                                           act=ARGS.act
-                                                           )
                      )
     else:
         print("[ERROR] environment not yet implemented")
@@ -223,18 +213,12 @@ if __name__ == "__main__":
                                obs=ARGS.obs,
                                act=ARGS.act
                                )
-    elif ARGS.env == 'leaderfollower':
-        temp_env = LeaderFollowerAviary(num_drones=ARGS.num_drones,
+    elif ARGS.env == 'goal':
+        temp_env = GoalAviary(num_drones=ARGS.num_drones,
                                         aggregate_phy_steps=shared_constants.AGGR_PHY_STEPS,
                                         obs=ARGS.obs,
                                         act=ARGS.act
                                         )
-    elif ARGS.env == 'meetup':
-        temp_env = MeetupAviary(num_drones=ARGS.num_drones,
-                                aggregate_phy_steps=shared_constants.AGGR_PHY_STEPS,
-                                obs=ARGS.obs,
-                                act=ARGS.act
-                                )
     else:
         print("[ERROR] environment not yet implemented")
         exit()
@@ -245,7 +229,7 @@ if __name__ == "__main__":
     })
     action_space = temp_env.action_space()[0]
 
-    print(f'Obs space: {observer_space} | Act space: {action_space}')
+    # print(f'Obs space: {observer_space} | Act space: {action_space} | {temp_env.observation_space()}')
 
     #### Note ##################################################
     # RLlib will create ``num_workers + 1`` copies of the
@@ -263,14 +247,17 @@ if __name__ == "__main__":
         "num_gpus": int(os.environ.get("RLLIB_NUM_GPUS", "0")), # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0
         "batch_mode": "complete_episodes",
         "callbacks": FillInActions,
-        "framework": "torch",
+        "framework": "tf2",
     }
 
     #### Set up the model parameters of the trainer's config ###
     model_params = swarmnet.utils.load_model_params(ARGS.config)
+    model_params['num_nodes'] = NUM_NODES
+    model_params['output_dim'] = OUTPUT_DIM
+
     config["model"] = { 
         "custom_model": "cc_model",
-        "custom_model_config": {'foo': 'bar'}
+        "custom_model_config": model_params
     }
     
     #### Set up the multiagent params of the trainer's config ##
