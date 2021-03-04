@@ -1,20 +1,19 @@
-import time
 import argparse
 import random
+import time
+
 import gym
 import numpy as np
 import pybullet as p
-
-from gym_pybullet_drones.utils.Logger import Logger
-from gym_pybullet_drones.envs.multi_agent_rl.FlockAviary import FlockAviary
-from gym_pybullet_drones.utils.utils import sync, str2bool
-from gym_pybullet_drones.envs.single_agent_rl.BaseSingleAgentAviary import ActionType
-
-from swarms import Environment2D, Boid, Goal, Sphere
-import swarms
 import swarmnet
+import swarms
+from gym_pybullet_drones.envs.multi_agent_rl.FlockAviary import FlockAviary
+from gym_pybullet_drones.envs.single_agent_rl.BaseSingleAgentAviary import \
+    ActionType
+from gym_pybullet_drones.utils.Logger import Logger
+from gym_pybullet_drones.utils.utils import str2bool, sync
+from swarms import Boid, Environment2D, Goal, Sphere
 
-log = []
 # The Z position at which to intitialize the drone
 # When using velocity based PID control, same value of Z
 # needs to be set in Base{Single,Multi}agentAviary.py
@@ -45,7 +44,7 @@ PYB_CLIENT = env.getPyBulletClient()
 
 # Initialize obstacle and goal in the drone env
 if obstacle_present:
-    p.loadURDF("sphere2.urdf", [obstacle_x, obstacle_y,0.5], globalScaling = 0.5, useFixedBase=1, physicsClientId=PYB_CLIENT)
+    p.loadURDF("sphere2.urdf", [obstacle_x, obstacle_y,0.5], globalScaling = 1., useFixedBase=1, physicsClientId=PYB_CLIENT)
 p.loadURDF("duck_vhacd.urdf", [goal_x, goal_y,0.05],  physicsClientId=PYB_CLIENT)
 
 
@@ -53,7 +52,7 @@ p.loadURDF("duck_vhacd.urdf", [goal_x, goal_y,0.05],  physicsClientId=PYB_CLIENT
 edges = swarmnet.utils.system_edges(goals=1, obstacles=1 if obstacle_present else 0, boids=len(initial_positions))
 edge_types = swarmnet.utils.one_hot(edges, num_classes=4, dtype=np.float32)
 edge_types = np.expand_dims(edge_types, 0)
-# print('EDGE TYPES', edge_types, edge_types.shape)
+print('EDGE TYPES', edges, edge_types.shape)
 
 # Load SwarmNet model
 model_params = swarmnet.utils.load_model_params(config='/mnt/c/Parth/CS_Projects/drone_swarm/configs/config.json')
@@ -81,7 +80,6 @@ for i in range(12*int(env.SIM_FREQ/env.AGGR_PHY_STEPS)):
     # print(predicted_action[:,:,1,:2][0,0]*POS_NORM)
     for agent in range(len(initial_positions)):
         action[agent][:2] = predicted_action[:,:,agent+static_entities,2:][0,0] #*POS_NORM # Swarms posn and vel
-    log.append((state, action))
     obs, reward, done, info = env.step(action)
     # print(action)
     # print(i, state, action)
