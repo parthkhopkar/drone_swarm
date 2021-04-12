@@ -55,9 +55,9 @@ def main():
                     )
 
     # Load SwarmNet model
-    model_params = swarmnet.utils.load_model_params(config='/mnt/c/Parth/CS_Projects/drone_swarm/configs/config.json')
+    model_params = swarmnet.utils.load_model_params(config='configs/config.json')
     model = swarmnet.SwarmNet.build_model(len(initial_positions) + static_entities, 4, model_params, pred_steps=1)
-    swarmnet.utils.load_model(model, '/mnt/c/Parth/CS_Projects/drone_swarm/models')
+    swarmnet.utils.load_model(model, 'models')
 
     start = time.time()
 
