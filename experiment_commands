@@ -1,0 +1,11 @@
+python3 test_swarmnet_rl.py --noise 0.0 --write-file no_noise_model.txt --trials 20
+python3 test_swarmnet_rl.py --noise 0.1 --write-file no_noise_model.txt --trials 20
+python3 test_swarmnet_rl.py --noise 0.2 --write-file no_noise_model.txt --trials 20
+python3 test_swarmnet_rl.py --noise 0.3 --write-file no_noise_model.txt --trials 20
+python3 test_swarmnet_rl.py --noise 0.4 --write-file no_noise_model.txt --trials 20
+python3 test_swarmnet_rl.py --noise 0.5 --write-file no_noise_model.txt --trials 20
+python3 test_swarmnet_rl.py --noise 0.6 --write-file no_noise_model.txt --trials 20
+python3 test_swarmnet_rl.py --noise 0.7 --write-file no_noise_model.txt --trials 20
+python3 test_swarmnet_rl.py --noise 0.8 --write-file no_noise_model.txt --trials 20
+python3 test_swarmnet_rl.py --noise 0.9 --write-file no_noise_model.txt --trials 20
+python3 test_swarmnet_rl.py --noise 1.0 --write-file no_noise_model.txt --trials 20
