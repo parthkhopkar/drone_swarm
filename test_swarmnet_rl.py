@@ -23,7 +23,10 @@ def main():
     position_list = [[-1,1.5,Z], [-1,1,Z], [-1,0.5,Z], [-1,0,Z], [-1,-0.5,Z], [-1, 2, Z], [-1,-2.5,Z], [-1, 3, Z]]
     initial_positions = position_list[:N]
     # initial_positions = [[0,1,Z], [0,1.5,Z], [0,0,Z],[0,-0.5,Z],[0,-1,Z]]
-    # initial_positions = [np.concatenate((np.random.uniform(-3,3,2), [Z])) for i in range(N)]
+    # initial_positions = [np.concatenate((np.random.uniform(-2,2,2), [Z])) for i in range(N)]
+    # initial_positions = [np.concatenate((np.random.uniform(-3,0,1), np.random.uniform(-2,3,1), [Z])) for i in range(N)]
+    # initial_positions = [np.array([-0.58585978, -0.87316904,  0.5       ]), np.array([ 1.87090943, -0.88363867,  0.5       ]), np.array([-1.35881617,  1.34395107,  0.5       ]), np.array([-0.18478594, -1.16298528,  0.5       ]), np.array([ 1.08254043, -0.25834089,  0.5       ]), np.array([-0.68811666, -0.4230929 ,  0.5       ]), np.array([0.21411444, 1.39615244, 0.5       ]), np.array([-0.94347364, -0.71620732,  0.5       ]), np.array([-1.70657342,  1.12817163,  0.5       ])]
+    # initial_positions = [np.array([2.89237823, 0.65866432, 0.5       ]), np.array([-1.33614597, -2.0015307 ,  0.5       ]), np.array([-0.88241996,  0.02305275,  0.5       ]), np.array([-0.78621962, -2.14148666,  0.5       ]), np.array([-2.26240964,  0.09046559,  0.5       ])]
     # initial_positions = [np.array([ 2.1049795 , -0.96557476,  0.5       ]), np.array([ 1.18638325, -1.1899444 ,  0.5       ]), np.array([0.45437863, 0.45471353, 0.5       ]), np.array([ 0.29974025, -1.05334061,  0.5       ]), np.array([-0.07426064, -2.09950476,  0.5       ])]
     # initial_positions = [np.array([1.45533071, 2.53635661, 0.5       ]), np.array([1.92868378, 2.22490029, 0.5       ]), np.array([0.72355883, 1.95052319, 0.5       ]), np.array([0.98709564, 0.01775948, 0.5       ]), np.array([ 2.33979686, -0.45348238,  0.5       ])]
     # initial_positions = [np.array([1.97552489, 2.52728928, 0.5       ]), np.array([ 1.21273208, -1.48935984,  0.5       ]), np.array([-1.06621393,  2.7865154 ,  0.5       ]), np.array([-1.52576967, -1.0172671 ,  0.5       ]), np.array([-2.6915656 ,  0.75233835,  0.5       ])]
@@ -32,7 +35,7 @@ def main():
     goal_x, goal_y = 3., 3.
     # goal_x, goal_y = np.random.uniform(-1,1,2)
     goal_pos = [goal_x, goal_y, 0.05]
-    obstacle_x, obstacle_y = 1., 1.
+    obstacle_x, obstacle_y = 1.5, 1.5
     obstacle_pos = [(obstacle_x, obstacle_y, Z)]
     obstacle_present = True
     static_entities = 1 + (1 if obstacle_present else 0)
